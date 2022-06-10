@@ -1,0 +1,32 @@
+{
+    "name": "shanjing/dcat-admin-setting",
+    "alias": "",
+    "description": "Description...",
+    "type": "library",
+    "keywords": ["dcat-admin", "extension"],
+    "homepage": "https://github.com/shanjing-inc/dcat-admin-setting",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "wys",
+            "email": "wys@shanjing-inc.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.1.0",
+        "dcat/laravel-admin": "~2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Shanjing\\DcatAdminSetting\\": "src/"
+        }
+    },
+    "extra": {
+        "dcat-admin": "Shanjing\\DcatAdminSetting\\DcatAdminSettingServiceProvider",
+        "laravel": {
+            "providers": [
+                "Shanjing\\DcatAdminSetting\\DcatAdminSettingServiceProvider"
+            ]
+        }
+    }
+}
