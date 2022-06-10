@@ -5,7 +5,7 @@ namespace Shanjing\DcatAdminSetting;
 use Dcat\Admin\Extend\ServiceProvider;
 use Dcat\Admin\Admin;
 
-class DcatAdminSettingServiceProvider extends ServiceProvider
+class SettingServiceProvider extends ServiceProvider
 {
     // 定义菜单
     protected $menu = [

@@ -8,14 +8,14 @@ use Dcat\Admin\Form;
 use Dcat\Admin\Grid;
 use Dcat\Admin\Http\Controllers\AdminController;
 use Illuminate\Routing\Controller;
-use Shanjing\DcatAdminSetting\DcatAdminSettingServiceProvider;
+use Shanjing\DcatAdminSetting\SettingServiceProvider;
 use Shanjing\DcatAdminSetting\Models\SystemSetting;
 
 class DcatAdminSettingController extends AdminController
 {
     protected function title()
     {
-        return $this->title ?: DcatAdminSettingServiceProvider::trans('setting.title');
+        return $this->title ?: SettingServiceProvider::trans('setting.title');
     }
 
     /**

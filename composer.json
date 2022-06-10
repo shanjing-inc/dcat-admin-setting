@@ -22,10 +22,10 @@
         }
     },
     "extra": {
-        "dcat-admin": "Shanjing\\DcatAdminSetting\\DcatAdminSettingServiceProvider",
+        "dcat-admin": "Shanjing\\DcatAdminSetting\\SettingServiceProvider",
         "laravel": {
             "providers": [
-                "Shanjing\\DcatAdminSetting\\DcatAdminSettingServiceProvider"
+                "Shanjing\\DcatAdminSetting\\SettingServiceProvider"
             ]
         }
     }
