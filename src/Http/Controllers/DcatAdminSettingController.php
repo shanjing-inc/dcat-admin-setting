@@ -45,7 +45,7 @@ class DcatAdminSettingController extends AdminController
         return Form::make(new SystemSetting(), function (Form $form) {
             $form->display('id');
             $form->text('key', '键名');
-            $form->textarea('value', '键值');
+            $form->jsoneditor2('value', '键值');
 
             $form->display('created_at');
             $form->display('updated_at');
