@@ -12,7 +12,6 @@
 
 <!-- script标签加上 "init" 属性后会自动使用 Dcat.init() 方法动态监听元素生成 -->
 <script require="@jsoneditor2" init="{!! $selector !!}">
-    console.log(id)
     var container = document.getElementById('left-{{$column}}');
     const options_{{$column}} = {
         mode: 'tree',
@@ -29,10 +28,13 @@
         }
     }
     var json = {!! $value !!};
-    window['editor_{{$column}}'] = new JSONEditor(container, options_{{$column}}, json);
-    // set json
-    // abc.set(json);
-    // get json
+    var clock = setInterval(function () {
+      if (JSONEditor) {
+        window['editor_{{$column}}'] = new JSONEditor(container, options_{{$column}}, json)
+        clearInterval(clock);
+      }
+    }, 200);
+
     $('button[type="submit"]').click(function() {
         var json = window['editor_{{$column}}'].get()
         $("input[name='{{$name}}']").val(JSON.stringify(json))

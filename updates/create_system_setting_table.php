@@ -21,8 +21,9 @@ class CreateSystemSettingTable extends Migration
         if (! Schema::hasTable('system_setting')) {
             Schema::create('system_setting', function (Blueprint $table) {
                 $table->id();
-                $table->string('key', 100)->unique();
-                $table->longText('value');
+                $table->string('title', 100)->comment('标题');
+                $table->string('key', 100)->unique()->comment('键名');
+                $table->longText('value')->comment('键值');
                 $table->timestamps();
             });
         }

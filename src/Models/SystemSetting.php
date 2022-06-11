@@ -5,6 +5,7 @@ namespace Shanjing\DcatAdminSetting\Models;
 use Dcat\Admin\Traits\HasDateTimeFormatter;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
+use Shanjing\DcatAdminSetting\SettingServiceProvider;
 
 class SystemSetting extends Model
 {
@@ -22,8 +23,6 @@ class SystemSetting extends Model
     protected $casts  = [
         'data' => 'array'
     ];
-
-    public const CACHE_KEY = 'system_setting';
 
     /**
      * 使用模型的闭包删除缓存
@@ -52,7 +51,8 @@ class SystemSetting extends Model
      */
     public static function flush()
     {
-        Cache::store()->forget(static::CACHE_KEY);
+        $cacheKey = static::getCacheKey();
+        static::getCacheStore()->forget($cacheKey);
     }
 
     /**
@@ -66,8 +66,8 @@ class SystemSetting extends Model
      */
     public static function get($name = null, $key = null, $default = null)
     {
-        $cacheKey = static::CACHE_KEY;
-        $cacheData = Cache::store()->rememberForever($cacheKey, function () {
+        $cacheKey = static::getCacheKey();
+        $cacheData = static::getCacheStore()->rememberForever($cacheKey, function () {
             return static::where('key', '!=', '')->pluck('value', 'key')->toArray();
         });
 
@@ -82,5 +82,28 @@ class SystemSetting extends Model
         }
 
         return array_get($value, $key, $default);
+    }
+
+    /**
+     * 获取缓存驱动
+     *
+     * @return \Illuminate\Contracts\Cache\Repository
+     * @author 王衍生 <wys@shanjing-inc.com>
+     */
+    public static function getCacheStore()
+    {
+        $storeName = SettingServiceProvider::setting('cache_store');
+        return Cache::store($storeName);
+    }
+
+    /**
+     * 获取缓存键名
+     *
+     * @return string
+     * @author 王衍生 <wys@shanjing-inc.com>
+     */
+    public static function getCacheKey()
+    {
+        return SettingServiceProvider::setting('cache_key');
     }
 }

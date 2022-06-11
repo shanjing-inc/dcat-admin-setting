@@ -28,8 +28,8 @@ class DcatAdminSettingController extends AdminController
         return Grid::make(new SystemSetting(), function (Grid $grid) {
             $grid->model()->orderByDesc('id');
             $grid->column('id')->sortable();
+            $grid->column('title', '标题');
             $grid->column('key', '键名');
-            $grid->column('value', '键值');
             $grid->column('created_at');
             $grid->column('updated_at')->sortable();
         });
@@ -44,6 +44,7 @@ class DcatAdminSettingController extends AdminController
     {
         return Form::make(new SystemSetting(), function (Form $form) {
             $form->display('id');
+            $form->text('title', '标题');
             $form->text('key', '键名');
             $form->jsoneditor2('value', '键值');
 
