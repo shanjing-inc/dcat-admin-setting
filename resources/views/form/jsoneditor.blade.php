@@ -11,7 +11,7 @@
 </div>
 
 <!-- script标签加上 "init" 属性后会自动使用 Dcat.init() 方法动态监听元素生成 -->
-<script require="@jsoneditor2" init="{!! $selector !!}">
+<script require="@shanjingJsoneditor" init="{!! $selector !!}">
     var container = document.getElementById('left-{{$column}}');
     const options_{{$column}} = {
         mode: 'tree',

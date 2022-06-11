@@ -46,7 +46,7 @@ class DcatAdminSettingController extends AdminController
             $form->display('id');
             $form->text('title', '标题');
             $form->text('key', '键名');
-            $form->jsoneditor2('value', '键值');
+            $form->shanjingJsoneditor('value', '键值');
 
             $form->display('created_at');
             $form->display('updated_at');

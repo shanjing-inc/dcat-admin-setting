@@ -1,7 +1,7 @@
 {
     "name": "shanjing/dcat-admin-setting",
     "alias": "",
-    "description": "Description...",
+    "description": "这是一个 Dcat Admin 系统设置管理插件",
     "type": "library",
     "keywords": ["dcat-admin", "extension"],
     "homepage": "https://github.com/shanjing-inc/dcat-admin-setting",

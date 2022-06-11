@@ -34,7 +34,7 @@ class SettingServiceProvider extends ServiceProvider
 	{
 		parent::init();
 
-        Admin::asset()->alias('@jsoneditor2', [
+        Admin::asset()->alias('@shanjingJsoneditor', [
             'js'  => [
                 "vendor/dcat-admin-extensions/shanjing/dcat-admin-setting/jsoneditor@9.5.6/dist/jsoneditor.min.js",
             ],
@@ -43,7 +43,7 @@ class SettingServiceProvider extends ServiceProvider
             ],
         ]);
 
-		Form::extend('jsoneditor2', Jsoneditor::class);
+		Form::extend('shanjingJsoneditor', Jsoneditor::class);
 	}
 
 	public function settingForm()
