@@ -5,25 +5,16 @@ namespace Shanjing\DcatAdminSetting;
 use Dcat\Admin\Extend\ServiceProvider;
 use Dcat\Admin\Admin;
 use Dcat\Admin\Form;
+use Illuminate\Support\Facades\Route;
 use Shanjing\DcatAdminSetting\Form\Jsoneditor;
 
 class SettingServiceProvider extends ServiceProvider
 {
     // 定义菜单
-    protected $menu = [
-        [
-            'title' => '系统设置',
-            'uri'   => 'system-setting',
-            'icon'  => '', // 图标可以留空
-        ],
-    ];
+    protected $menu = [];
 
-	protected $js = [
-        'jsoneditor@9.5.6/dist/jsoneditor.min.js',
-    ];
-	protected $css = [
-		'jsoneditor@9.5.6/dist/jsoneditor.min.css',
-	];
+	protected $js = [];
+	protected $css = [];
 
 	public function register()
 	{
