@@ -1,9 +1,9 @@
-### 这是一个 Dcat Admin 系统设置管理插件
+## 这是一个 Dcat Admin 系统设置管理插件
 
-### 环境
+## 环境
 - dcat/laravel-admin ~2.0
 
-### 安装
+## 安装
 
 首先安装 dcat-admin [参考文档](https://learnku.com/docs/dcat-admin/2.x/install/8081)，
 
@@ -15,12 +15,51 @@
 
 再点解 设置 按钮，进行配置相关信息，
 
+目前有 3 个配置项
+cache_store：缓存驱动（列表选择）
+cache_key：缓存键名（起一个唯一缓存 key 就可以，）
+page_route：后台编辑缓存的页面路由
+
 最后再点击 启用 按钮之后方可正常使用。
 
-### 使用
+## 使用
 
-查看配置列表: https://domain/admin/system-setting
+### 配置菜单
+打开 系统管理->菜单 配置菜单。
 
-新增配置: https://domain/admin/system-setting/create
+- 标题：随意，一般为 系统配置；
 
-获取配置: SystemSetting::get($key);
+- 路径：page_route 的值；
+
+- 其他项：无特殊要有，就像配置普通菜单一样即可；
+
+最终菜单 url 为：https://domain/admin/{page_route}
+
+### 新增配置
+点击上一步配置的菜单打开列表页点击新增按钮；
+- 标题：随意，只为后台便于理解说明
+- 键名：用来获取数据的键名，保证唯一性，比如 ```site_info```
+- 键值：json 格式，比如 ```{
+  "name": "我的网站",
+  "keyword": "技术博客，PHP 博客",
+}```
+
+### 获取配置
+
+获取配置
+```php
+use Shanjing\DcatAdminSetting\Models\SystemSetting
+
+// 比如获取站点名称
+$key = 'site_info'; // 配置数据的键名
+$name = 'name'; // 配置数据的 json 格式的 key
+$default = '我的网站';
+$siteName = SystemSetting::get($key, $name, $default);
+print($siteName); // 输出：我的网站
+
+// 也可以获取站点 key 下的所有配置
+$key = 'site_info'; // 配置数据的键名
+$siteInfo = SystemSetting::get($key);
+print($siteInfo); // 输出：[ "name" => "我的网站", "keyword" => "技术博客，PHP 博客"]
+print($siteInfo['name']); // 输出：我的网站
+```
