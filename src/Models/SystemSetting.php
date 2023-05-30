@@ -21,7 +21,7 @@ class SystemSetting extends Model
     }
 
     protected $casts  = [
-        'data' => 'array'
+        'value' => 'array'
     ];
 
     /**
@@ -56,7 +56,7 @@ class SystemSetting extends Model
     }
 
     /**
-     * 获取配置
+     * 获取设置
      *
      * @param [type] $name
      * @param [type] $key

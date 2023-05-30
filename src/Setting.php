@@ -17,6 +17,6 @@ class Setting extends Form
         $stores = array_keys(config('cache.stores'));
         $this->select('cache_store', '缓存驱动')->options(array_combine($stores, $stores))->required();
         $this->text('cache_key', '缓存键名')->required();
-        $this->text('page_route', '页面路由')->help('不带 admin 前缀，就像 dcat 配置菜单一样');
+        $this->text('page_route', '页面路由')->help('不带 admin 前缀，就像 dcat 设置菜单一样');
     }
 }

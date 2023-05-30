@@ -8,18 +8,20 @@ class Jsoneditor extends Field
 {
     protected $view = 'shanjing.dcat-admin-setting::form.jsoneditor';
 
-    public function render()
+    /**
+     * Field constructor.
+     *
+     * @param  string|array  $column
+     * @param  array  $arguments
+     */
+    public function __construct($column, $arguments = [])
     {
-        $json = old($this->column, $this->value());
-        if (empty($json)) {
-            $json = '{}';
-        }
-        if (!is_string($json)) {
-            $json = json_encode($json);
-        } else {
-            $json = json_encode(json_decode($json));   //兼容json里有类似</p>格式，首次初始化显示会丢失的问题
-        }
-        $this->value = $json;
-        return parent::render();
+        parent::__construct(...func_get_args());
+        $this->default('{}');
+        $this->customFormat(function ($value) {
+            return json_encode($value ?: []);
+        })->saving(function ($value) {
+            return json_decode($value ?: '', true);
+        });
     }
 }
