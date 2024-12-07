@@ -14,8 +14,7 @@
     ],
     "require": {
         "php": ">=7.1.0",
-        "dcat/laravel-admin": "~2.0",
-        "laravel/helpers": "^1.6"
+        "laravel/helpers": "^1.7"
     },
     "autoload": {
         "psr-4": {
