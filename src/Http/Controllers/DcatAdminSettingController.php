@@ -7,6 +7,7 @@ use Dcat\Admin\Admin;
 use Dcat\Admin\Form;
 use Dcat\Admin\Grid;
 use Dcat\Admin\Http\Controllers\AdminController;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Shanjing\DcatAdminSetting\SettingServiceProvider;
 use Shanjing\DcatAdminSetting\Models\SystemSetting;
@@ -30,11 +31,131 @@ class DcatAdminSettingController extends AdminController
             $grid->column('id')->sortable();
             $grid->column('title', '标题');
             $grid->column('key', '键名');
+            
+            // 状态列
+            $grid->column('status', '状态')->using(SystemSetting::$getStatusOptions)->label([
+                SystemSetting::STATUS_ENABLED => 'success',
+                SystemSetting::STATUS_DISABLED => 'danger',
+            ]);
+
+            // 添加历史版本展开列
+            $grid->column('历史版本')
+            ->if(function() {
+                return !empty($this->getHistoryVersions());
+            })
+            ->display(function() {
+                return '查看详情';
+            })
+            ->expand(function () {
+                $historyVersions = $this->getHistoryVersions();
+
+                if (empty($historyVersions)) {
+                    return '<div class="alert alert-info">暂无历史版本</div>';
+                }
+                
+                $historyVersions = array_reverse($historyVersions);
+                $route = SettingServiceProvider::setting('page_route');
+                $url = admin_url($route . '-restore');
+
+                $html = '<div class="table-responsive">';
+                $html .= '<table class="table table-striped table-bordered">';
+                $html .= '<thead><tr><th>版本号</th><th>创建时间</th><th>数据预览</th><th>操作</th></tr></thead>';
+                $html .= '<tbody>';
+                
+                foreach ($historyVersions as $version) {
+                    $dataPreview = json_encode($version['data'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+
+                    $html .= '<tr>';
+                    $html .= '<td><span class="badge badge-primary">' . $version['version'] . '</span></td>';
+                    $html .= '<td>' . $version['created_at'] . '</td>';
+                    $html .= '<td><pre class="dump">' . htmlspecialchars($dataPreview) . '</pre></td>';
+                    $html .= '<td>';
+                    $html .= '<button type="button" class="btn btn-sm btn-success restore-version-btn" ';
+                    $html .= 'data-id="' . $this->id . '" ';
+                    $html .= 'data-version="' . $version['version'] . '">';
+                    $html .= '恢复到此版本</button>';
+                    $html .= '</td>';
+                    $html .= '</tr>';
+                }
+                
+                $html .= '</tbody></table></div>';
+                
+                // 添加 JavaScript 处理恢复逻辑，使用 Dcat 的确认弹框
+                $html .= '<script>
+                    $(document).on("click", ".restore-version-btn", function() {
+                        var btn = $(this);
+                        var id = btn.data("id");
+                        var version = btn.data("version");
+                        
+                        Dcat.confirm("确定要恢复到版本 " + version + " 吗？", "此操作将覆盖当前数据，请谨慎操作。", function() {
+                            $.ajax({
+                                url: "' . $url . '",
+                                type: "POST",
+                                data: {
+                                    id: id,
+                                    version: version,
+                                    _token: "' . csrf_token() . '"
+                                },
+                                success: function(response) {
+                                    if (response.status) {
+                                        Dcat.success(response.message || "恢复成功");
+                                        setTimeout(function() {
+                                            location.reload();
+                                        }, 1000);
+                                    } else {
+                                        Dcat.error(response.message || "恢复失败");
+                                    }
+                                },
+                                error: function() {
+                                    Dcat.error("恢复失败，请重试");
+                                }
+                            });
+                        });
+                    });
+                </script>';
+                
+                return $html;
+            });
+
             $grid->column('created_at');
             $grid->column('updated_at')->sortable();
 
             $grid->disableViewButton();
         });
+    }
+
+    /**
+     * 恢复到指定版本
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function restore(Request $request)
+    {
+        try {
+            $id = $request->input('id');
+            $version = $request->input('version');
+
+            $setting = SystemSetting::findOrFail($id);
+            $result = $setting->restoreToVersion($version);
+
+            if ($result) {
+                return response()->json([
+                    'status' => true,
+                    'message' => "成功恢复到版本 {$version}"
+                ]);
+            } else {
+                return response()->json([
+                    'status' => false,
+                    'message' => '恢复失败，版本不存在'
+                ]);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => '恢复失败：' . $e->getMessage()
+            ]);
+        }
     }
 
     /**
@@ -46,9 +167,16 @@ class DcatAdminSettingController extends AdminController
     {
         return Form::make(new SystemSetting(), function (Form $form) {
             $form->disableViewButton();
+            $form->disableDeleteButton();
             $form->display('id');
             $form->text('title', '标题')->required();
             $form->text('key', '键名')->required();
+            
+            // 状态选择
+            $form->radio('status', '状态')
+                ->options(SystemSetting::$getStatusOptions)
+                ->default(SystemSetting::STATUS_ENABLED)
+                ->required();
             // 获取当前记录
             $model = $form->model();
             $isEdit = $model && $model->exists;
