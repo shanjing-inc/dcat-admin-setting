@@ -21,8 +21,11 @@ class SystemSetting extends Model
     }
 
     protected $casts  = [
-        'value' => 'array'
+        'value' => 'array',
+        'json_schema' => 'array'
     ];
+
+    protected $fillable = ['title', 'key', 'value', 'json_schema'];
 
     /**
      * 使用模型的闭包删除缓存

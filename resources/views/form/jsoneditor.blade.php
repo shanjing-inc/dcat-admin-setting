@@ -14,7 +14,7 @@
 <script require="@shanjingJsoneditor" init="{!! $selector !!}">
     var container = document.getElementById('left-{{$column}}');
     const options_{{$column}} = {
-        mode: 'tree',
+        mode: 'code',
         language:'zh',
         modes: ['code', 'tree', 'form', 'text',  'view', 'preview'], // allowed modes
         onError: function (err) {
