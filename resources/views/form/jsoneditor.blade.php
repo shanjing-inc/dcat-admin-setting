@@ -53,7 +53,7 @@
 
     const options_{{$column}} = {
         mode: 'code',
-        language:'zh',
+        language:'zh-CN',
         modes: ['code', 'tree', 'form', 'text', 'view', 'preview'], // allowed modes
         onError: function (err) {
             alert(err.toString())

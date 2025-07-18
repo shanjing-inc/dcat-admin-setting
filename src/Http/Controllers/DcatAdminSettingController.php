@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Shanjing\DcatAdminSetting\SettingServiceProvider;
 use Shanjing\DcatAdminSetting\Models\SystemSetting;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class DcatAdminSettingController extends AdminController
 {
@@ -31,7 +32,7 @@ class DcatAdminSettingController extends AdminController
             $grid->column('id')->sortable();
             $grid->column('title', '标题');
             $grid->column('key', '键名');
-            
+
             // 状态列
             $grid->column('status', '状态')->using(SystemSetting::$getStatusOptions)->label([
                 SystemSetting::STATUS_ENABLED => 'success',
@@ -52,7 +53,7 @@ class DcatAdminSettingController extends AdminController
                 if (empty($historyVersions)) {
                     return '<div class="alert alert-info">暂无历史版本</div>';
                 }
-                
+
                 $historyVersions = array_reverse($historyVersions);
                 $route = SettingServiceProvider::setting('page_route');
                 $url = admin_url($route . '-restore');
@@ -61,7 +62,7 @@ class DcatAdminSettingController extends AdminController
                 $html .= '<table class="table table-striped table-bordered">';
                 $html .= '<thead><tr><th>版本号</th><th>创建时间</th><th>数据预览</th><th>操作</th></tr></thead>';
                 $html .= '<tbody>';
-                
+
                 foreach ($historyVersions as $version) {
                     $dataPreview = json_encode($version['data'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 
@@ -77,16 +78,16 @@ class DcatAdminSettingController extends AdminController
                     $html .= '</td>';
                     $html .= '</tr>';
                 }
-                
+
                 $html .= '</tbody></table></div>';
-                
+
                 // 添加 JavaScript 处理恢复逻辑，使用 Dcat 的确认弹框
                 $html .= '<script>
                     $(document).on("click", ".restore-version-btn", function() {
                         var btn = $(this);
                         var id = btn.data("id");
                         var version = btn.data("version");
-                        
+
                         Dcat.confirm("确定要恢复到版本 " + version + " 吗？", "此操作将覆盖当前数据，请谨慎操作。", function() {
                             $.ajax({
                                 url: "' . $url . '",
@@ -113,14 +114,21 @@ class DcatAdminSettingController extends AdminController
                         });
                     });
                 </script>';
-                
+
                 return $html;
             });
 
             $grid->column('created_at');
             $grid->column('updated_at')->sortable();
 
+            $grid->actions(function (Grid\Displayers\Actions $actions) {
+                if ($this->status == SystemSetting::STATUS_ENABLED) {
+                    $actions->disableDelete();
+                }
+            });
+
             $grid->disableViewButton();
+            $grid->disableBatchDelete();
         });
     }
 
@@ -171,7 +179,7 @@ class DcatAdminSettingController extends AdminController
             $form->display('id');
             $form->text('title', '标题')->required();
             $form->text('key', '键名')->required();
-            
+
             // 状态选择
             $form->radio('status', '状态')
                 ->options(SystemSetting::$getStatusOptions)
@@ -179,11 +187,7 @@ class DcatAdminSettingController extends AdminController
                 ->required();
             // 获取当前记录
             $model = $form->model();
-            $isEdit = $model && $model->exists;
-
-            $hasJsonSchema = $isEdit && !empty($model->json_schema);
-
-            if ($isEdit && $hasJsonSchema) {
+            if ($form->isEditing() && !empty($model->json_schema)) {
                 // 编辑模式且有JSON Schema，使用JsonSchema组件
                 $form->shanjingJsonSchema('combined_data', '配置数据')
                     ->help('基于JSON Schema的表单编辑器')
@@ -221,6 +225,18 @@ class DcatAdminSettingController extends AdminController
 
                 $form->shanjingJsoneditor('json_schema', 'JSON Schema')->attribute('style', 'margin-bottom:20px')
                     ->help('非必填。可用 <a href="https://json.ophir.dev/" target="_blank">https://json.ophir.dev</a> 生成 json schema，为键值字段生成表单样式，方便编辑');
+            }
+
+            if ($form->isDeleting()) {
+                $records = $model->toArray();
+                foreach ($records as $record) {
+                    if ($record['status'] == SystemSetting::STATUS_ENABLED) {
+                        throw new BadRequestHttpException('配置开启状态不允许删除');
+                    }
+                    if (now()->subDays(7)->isBefore($record['updated_at'])) {
+                        throw new BadRequestHttpException('设置关闭状态 7 天内不允许删除');
+                    }
+                }
             }
 
             $form->display('created_at');
